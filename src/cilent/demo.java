@@ -62,16 +62,6 @@ public class demo extends Dialog {
 		shell.setSize(425,315);
 		shell.setText(getText());
 		
-//		Composite composite = new Composite(shell, SWT.NONE);
-//		composite.setVisible(true);
-//		composite.addFocusListener(new FocusAdapter() {
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				composite.setVisible(false);
-//			}
-//		});
-//		composite.setBounds(10, 10, 400, 260);
-		
 		Label lblNewLabel = new Label(shell, SWT.NONE);
 		lblNewLabel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -127,7 +117,7 @@ public class demo extends Dialog {
 		lblNewLabel_3.setBounds(150, 140, 100, 100);
 		SwtUtils.autoImage(lblNewLabel_3);
 		
-		//更多 TODO 鼠标点击从本地选择图片文件上传
+		//更多 鼠标点击从本地选择图片文件上传
 		Label lblNewLabel_4 = new Label(shell, SWT.NONE);
 		lblNewLabel_4.addMouseListener(new MouseAdapter() {
 			@Override

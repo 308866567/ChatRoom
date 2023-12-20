@@ -8,7 +8,6 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
@@ -124,7 +123,6 @@ public class Client1 {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				showHeadshots(memes.getLocation().x-200, memes.getLocation().y-170);
-//				showHeadshots(300,260);
 			}
 		});
 		memes.setBounds(636, 602, 100, 30);
@@ -137,16 +135,6 @@ public class Client1 {
 		Shell box = new Shell(shell, SWT.ON_TOP|SWT.CLOSE);
 		box.setSize(400,300);
 		box.setLocation(x, y);
-		
-//		Composite composite = new Composite(shell, SWT.NONE);
-//		composite.setVisible(true);
-//		composite.addFocusListener(new FocusAdapter() {
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				composite.setVisible(false);
-//			}
-//		});
-//		composite.setBounds(x, y, 400, 260);
 		
 		Label lblNewLabel = new Label(box, SWT.NONE);
 		lblNewLabel.addMouseListener(new MouseAdapter() {

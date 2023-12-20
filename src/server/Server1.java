@@ -7,16 +7,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Text;
 
 import util.SwtUtils;
 
 public class Server1 {
 
 	protected Shell shell;
-	private Table user_list;
-	private Table chat;
-	private Text text;
 	private Table ulist;
 	private Table chatContent;
 
