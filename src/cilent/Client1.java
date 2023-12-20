@@ -17,7 +17,11 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import common.Message;
+import common.UserSocket;
 import util.SwtUtils;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class Client1 {
 
@@ -26,10 +30,16 @@ public class Client1 {
 	private Table chat;
 	private Text text;
 	String messageString;
-	private String imgPath="";
-	
+	private String imgPath = "";
+	// 套接字
+	UserSocket userSocket;
+	String name;
+	String IP;
+	int port;
+
 	/**
 	 * Launch the application.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -107,11 +117,18 @@ public class Client1 {
 		text.setBounds(250, 434, 594, 151);
 		
 		Button send = new Button(shell, SWT.NONE);
+		send.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+			}
+		});
 		//TODO 发送按钮 添加事件发送表情包或文字信息
 		send.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				
+				Message msg =new Message();
+				//给msg添加信息
+				userSocket.send(msg);
 			}
 		});
 		send.setBounds(744, 602, 100, 30);
@@ -127,15 +144,31 @@ public class Client1 {
 		});
 		memes.setBounds(636, 602, 100, 30);
 		memes.setText("表情包");
+		//客户端套接字
+		userSocket =new UserSocket(name,IP,port);
+		Display.getDefault().asyncExec(new Thread() {
+			@Override
+			public void run() {
+				while (true) {
+//					sleep(500);
+					try {
+						Message msg = userSocket.receive();
+						//收到的消息显示在面板上 TODO
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 
+			}
+		});
 	}
-	
-	//表情包选择框
-	private void showHeadshots(int x,int y) {
-		Shell box = new Shell(shell, SWT.ON_TOP|SWT.CLOSE);
-		box.setSize(400,300);
+
+	// 表情包选择框
+	private void showHeadshots(int x, int y) {
+		Shell box = new Shell(shell, SWT.ON_TOP | SWT.CLOSE);
+		box.setSize(400, 300);
 		box.setLocation(x, y);
-		
+
 		Label lblNewLabel = new Label(box, SWT.NONE);
 		lblNewLabel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -146,7 +179,7 @@ public class Client1 {
 		lblNewLabel.setImage(SWTResourceManager.getImage(demo.class, "/images/1.jpg"));
 		lblNewLabel.setBounds(25, 20, 100, 100);
 		SwtUtils.autoImage(lblNewLabel);
-		
+
 		Label lblNewLabel_1 = new Label(box, SWT.NONE);
 		lblNewLabel_1.addMouseListener(new MouseAdapter() {
 			@Override
@@ -157,7 +190,7 @@ public class Client1 {
 		lblNewLabel_1.setImage(SWTResourceManager.getImage(demo.class, "/images/2.jpg"));
 		lblNewLabel_1.setBounds(150, 20, 100, 100);
 		SwtUtils.autoImage(lblNewLabel_1);
-		
+
 		Label lblNewLabel_1_1 = new Label(box, SWT.NONE);
 		lblNewLabel_1_1.addMouseListener(new MouseAdapter() {
 			@Override
@@ -168,7 +201,7 @@ public class Client1 {
 		lblNewLabel_1_1.setImage(SWTResourceManager.getImage(demo.class, "/images/3.jpg"));
 		SwtUtils.autoImage(lblNewLabel_1_1);
 		lblNewLabel_1_1.setBounds(275, 20, 100, 100);
-		
+
 		Label lblNewLabel_2 = new Label(box, SWT.NONE);
 		lblNewLabel_2.addMouseListener(new MouseAdapter() {
 			@Override
@@ -179,7 +212,7 @@ public class Client1 {
 		lblNewLabel_2.setImage(SWTResourceManager.getImage(demo.class, "/images/4.jpg"));
 		lblNewLabel_2.setBounds(25, 140, 100, 100);
 		SwtUtils.autoImage(lblNewLabel_2);
-		
+
 		Label lblNewLabel_3 = new Label(box, SWT.NONE);
 		lblNewLabel_3.addMouseListener(new MouseAdapter() {
 			@Override
@@ -190,17 +223,17 @@ public class Client1 {
 		lblNewLabel_3.setImage(SWTResourceManager.getImage(demo.class, "/images/5.jpg"));
 		lblNewLabel_3.setBounds(150, 140, 100, 100);
 		SwtUtils.autoImage(lblNewLabel_3);
-		
-		//更多  鼠标点击从本地选择图片文件上传
+
+		// 更多 鼠标点击从本地选择图片文件上传
 		Label lblNewLabel_4 = new Label(box, SWT.NONE);
 		lblNewLabel_4.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 				FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
-                fileDialog.setFilterExtensions(new String[] { "*.jpg;*.png;*.gif;*.bmp" });
-                //获取文件地址
-                String filePath = fileDialog.open();
-                imgPath = filePath;
+				fileDialog.setFilterExtensions(new String[] { "*.jpg;*.png;*.gif;*.bmp" });
+				// 获取文件地址
+				String filePath = fileDialog.open();
+				imgPath = filePath;
 			}
 		});
 		lblNewLabel_4.setToolTipText("双击选择本地图片");

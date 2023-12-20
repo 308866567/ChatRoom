@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.util.HashSet;
 
 //存储服务端的信息
-public class ServerSocket {
+public class ServerSocket implements Runnable{
 	int id;
 	String name;
 	DatagramSocket datagramSocket;
@@ -16,7 +16,7 @@ public class ServerSocket {
 	HashSet<Integer> users = new HashSet<>();
 
 	// 服务端创建,监听本机地址的一个端口
-	ServerSocket(int port) {
+	public	ServerSocket(int port) {
 		try {
 			id = port;
 			datagramSocket = new DatagramSocket(port);// 服务器绑定到一个本机地址上的指定端口
@@ -47,15 +47,11 @@ public class ServerSocket {
 	}
 
 	// 接受来自客户端的消息,进行处理和分发
-	public Message receive() {
+	public Message receive() throws Exception {
 		byte[] buffer = new byte[1024 * 64];
 		DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length,
-				datagramSocket.getLocalSocketAddress());
-		try {
-			datagramSocket.receive(datagramPacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		datagramSocket.getLocalSocketAddress());
+		datagramSocket.receive(datagramPacket);
 		int len = datagramPacket.getLength();
 		byte[] t = new byte[len];
 		System.arraycopy(buffer, 0, t, 0, len);
@@ -64,6 +60,7 @@ public class ServerSocket {
 
 	// 处理和分发来自客户端的消息
 	public void solve(Message msg) {
+//		System.out.println(msg.SrcId+msg.name+"说"+msg.txt);
 		switch (msg.flag) {
 		// 下线
 		case -1:
@@ -90,5 +87,20 @@ public class ServerSocket {
 
 	public void close() {
 		datagramSocket.close();
+	}
+
+	//用线程接收消息
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				solve(receive());
+			} catch (Exception e) {
+				System.out.println("服务器接收异常");
+				close();
+				e.printStackTrace();
+			}
+		}
+
 	}
 }

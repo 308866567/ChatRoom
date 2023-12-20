@@ -9,13 +9,14 @@ import java.net.SocketAddress;
 //存储客户端的用户信息
 public class UserSocket {
 	int id;// 为套接字绑定的端口
+	int flag =0;//1表示在使用中,实现互斥
 	String name;
 	byte[] image;
 	DatagramSocket datagramSocket;
 	SocketAddress address;//服务器地址
 
 	//传入服务器地址
-	UserSocket(String name,String IP,int port) {
+	public UserSocket(String name,String IP,int port) {
 		this.name=name;
 		try {
 			datagramSocket = new DatagramSocket();// 客户端随机绑定一个本地主机的可用端口
