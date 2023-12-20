@@ -1,11 +1,10 @@
-package com;
+package common;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashSet;
-import java.util.Iterator;
 
 //存储服务端的信息
 public class ServerSocket {
