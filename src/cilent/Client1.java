@@ -36,6 +36,7 @@ public class Client1 {
 	String name;
 	String IP;
 	int port;
+	
 
 	/**
 	 * Launch the application.
@@ -128,6 +129,7 @@ public class Client1 {
 			public void mouseDown(MouseEvent e) {
 				Message msg =new Message();
 				//给msg添加信息
+				msg.setName(name);
 				userSocket.send(msg);
 			}
 		});

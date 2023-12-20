@@ -3,6 +3,10 @@ package cilent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Text;
@@ -11,12 +15,17 @@ import util.CustomCombo;
 
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 
 public class Login {
 
 	protected Shell shell;
 	private Text uname;
 	private Text uIP;
+//	String name;
+//	String IP;
+//	int port;
 
 	/**
 	 * Launch the application.
@@ -77,22 +86,30 @@ public class Login {
 //		
 //		headshot.setBounds(225, 171, 207, 32);
 		
-		CustomCombo customCombo = new CustomCombo(shell, SWT.READ_ONLY);
+//		CustomCombo customCombo = new CustomCombo(shell, SWT.READ_ONLY);
+//
+//        // 设置图标数组
+//        Image[] images = new Image[3];
+//        images[0] = new Image(display, "path/to/image1.png");
+//        images[1] = new Image(display, "path/to/image2.png");
+//        images[2] = new Image(display, "path/to/image3.png");
 
-        // 设置图标数组
-        Image[] images = new Image[3];
-        images[0] = new Image(display, "path/to/image1.png");
-        images[1] = new Image(display, "path/to/image2.png");
-        images[2] = new Image(display, "path/to/image3.png");
-
-        customCombo.setItemImages(images);
+//        customCombo.setItemImages(images);
 		
         //登录按钮 TODO 点击登录按钮后将用户名,用户IP等信息传递到服务器
 		Button login = new Button(shell, SWT.NONE);
+		login.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				Client1 client1 = new Client1();
+				//TODO
+				client1.open();
+			}
+		});
 		login.setBounds(202, 243, 114, 34);
 		login.setText("登录");
-
 	}
+	
 }
 
 

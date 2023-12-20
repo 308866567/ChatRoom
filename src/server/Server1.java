@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 
 import common.Message;
 import common.ServerSocket;
@@ -60,19 +61,22 @@ public class Server1 {
 		SwtUtils.centerWin(shell);
 
 		// 用户列表 用户信息,用户头像
-		TableViewer tableViewer = new TableViewer(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		ulist = tableViewer.getTable();
+		ulist = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
 		ulist.setBounds(10, 10, 225, 621);
+		Message t = new Message();
+		t.txt="消息1";
+		addMessage(t, ulist);
 
-		TableViewerColumn tableViewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-		TableColumn headshot = tableViewerColumn.getColumn();
+		//column只用于定义列的格式
+		TableColumn headshot = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
 		headshot.setWidth(60);
 
-		TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(tableViewer, SWT.NONE);
-		TableColumn uname = tableViewerColumn_1.getColumn();
+		TableColumn uname = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
 		uname.setWidth(150);
-		uname.setText("New Column");
+		
 
+		
+		//消息框
 		TableViewer tableViewer_1 = new TableViewer(shell, SWT.BORDER | SWT.FULL_SELECTION);
 		chatContent = tableViewer_1.getTable();
 		chatContent.setBounds(241, 10, 620, 621);
@@ -115,7 +119,7 @@ public class Server1 {
 							break;
 						// 接收到一条群聊
 						case 0:
-							addMessage(msg);
+							addMessage(msg, ulist);
 							break;
 						// 接收到一条私聊
 						case 3:
@@ -131,9 +135,12 @@ public class Server1 {
 		});
 	}
 
-	void addMessage(Message msg) {
+	void addMessage(Message msg, Table table) {
 		System.out.println(msg.txt);
-		//加一行表格
+		// 加一行表格
+		TableItem item = new TableItem(table, SWT.NONE);
+		item.setText(0, msg.txt);
+		item.setText(1, msg.txt);
 	}
 
 }
