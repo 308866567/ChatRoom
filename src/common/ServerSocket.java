@@ -20,6 +20,7 @@ public class ServerSocket implements Runnable{
 		try {
 			id = port;
 			datagramSocket = new DatagramSocket(port);// 服务器绑定到一个本机地址上的指定端口
+			datagramSocket.setSoTimeout(100);
 		} catch (Exception e) {
 			System.out.println("服务端套接字创建失败");
 			e.printStackTrace();
@@ -32,8 +33,8 @@ public class ServerSocket implements Runnable{
 			System.out.println("客户端" + port + "已经下线");
 			return;
 		}
-		msg.setSrcId(datagramSocket.getLocalPort());
-		msg.setName(name);
+		msg.SrcId=datagramSocket.getLocalPort();
+		msg.name=name;
 		byte[] t = Message.toByteArray(msg);
 		// 数据包设置服务器地址
 		DatagramPacket datagramPacket;
@@ -47,11 +48,15 @@ public class ServerSocket implements Runnable{
 	}
 
 	// 接受来自客户端的消息,进行处理和分发
-	public Message receive() throws Exception {
+	public Message receive()  {
 		byte[] buffer = new byte[1024 * 64];
 		DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length,
 		datagramSocket.getLocalSocketAddress());
-		datagramSocket.receive(datagramPacket);
+		try {
+			datagramSocket.receive(datagramPacket);
+		} catch (IOException e) {
+			return null;
+		}
 		int len = datagramPacket.getLength();
 		byte[] t = new byte[len];
 		System.arraycopy(buffer, 0, t, 0, len);

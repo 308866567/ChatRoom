@@ -32,6 +32,8 @@ public class UserSocket {
 	//消息加标志位
 	public void send(String msg,int flag) {
 		Message m= new Message();
+		m.SrcId=id;
+		m.name=name;
 		m.txt=msg;
 		m.flag=flag;
 		send(m);
@@ -39,8 +41,8 @@ public class UserSocket {
 	
 	// 给服务端发送Message类的字节流
 	public void send(Message msg) {
-		msg.setSrcId(datagramSocket.getLocalPort());
-		msg.setName(name);
+		msg.SrcId=datagramSocket.getLocalPort();
+		msg.name=name;
 		byte[] t = Message.toByteArray(msg);
 		// 数据包设置服务器地址
 		DatagramPacket datagramPacket;

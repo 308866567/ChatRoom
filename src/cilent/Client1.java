@@ -129,7 +129,7 @@ public class Client1 {
 			public void mouseDown(MouseEvent e) {
 				Message msg =new Message();
 				//给msg添加信息
-				msg.setName(name);
+				msg.name=name;
 				userSocket.send(msg);
 			}
 		});
