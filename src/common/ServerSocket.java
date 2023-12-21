@@ -7,11 +7,12 @@ import java.net.InetAddress;
 import java.util.HashSet;
 
 //存储服务端的信息
-public class ServerSocket implements Runnable{
+public class ServerSocket {
 	int id;
 	String name;
 	DatagramSocket datagramSocket;
 
+	int messageSize=0;//消息标志
 	// 端口表,set,存储客户端的端口
 	HashSet<Integer> users = new HashSet<>();
 
@@ -20,7 +21,7 @@ public class ServerSocket implements Runnable{
 		try {
 			id = port;
 			datagramSocket = new DatagramSocket(port);// 服务器绑定到一个本机地址上的指定端口
-			datagramSocket.setSoTimeout(100);
+//			datagramSocket.setSoTimeout(0);
 		} catch (Exception e) {
 			System.out.println("服务端套接字创建失败");
 			e.printStackTrace();
@@ -29,8 +30,11 @@ public class ServerSocket implements Runnable{
 
 	// 给客户端发送消息,需传入客户端地址
 	public void send(Message msg, String IP, int port) {
+		if(msg==null){
+			return ;
+		}
 		if (!users.contains(port)) {
-			System.out.println("客户端" + port + "已经下线");
+			System.out.println("客户端" + port + "不在线");
 			return;
 		}
 		msg.SrcId=datagramSocket.getLocalPort();
@@ -60,10 +64,12 @@ public class ServerSocket implements Runnable{
 		int len = datagramPacket.getLength();
 		byte[] t = new byte[len];
 		System.arraycopy(buffer, 0, t, 0, len);
-		return Message.getMessage(t);
+		Message msg=Message.getMessage(t);
+		msg.id=++messageSize;
+		return msg;
 	}
 
-	// 处理和分发来自客户端的消息
+	// 处理和分发来自客户端的消息,注意跳过发送方
 	public void solve(Message msg) {
 //		System.out.println(msg.SrcId+msg.name+"说"+msg.txt);
 		switch (msg.flag) {
@@ -80,7 +86,8 @@ public class ServerSocket implements Runnable{
 		// 群聊
 		case 0:
 			for (Integer t : users) {
-				send(msg, "127.0.0.1", t);
+				if(t!=msg.SrcId)
+					send(msg, "127.0.0.1", t);
 			}
 			break;
 		// 私聊
@@ -92,20 +99,5 @@ public class ServerSocket implements Runnable{
 
 	public void close() {
 		datagramSocket.close();
-	}
-
-	//用线程接收消息
-	@Override
-	public void run() {
-		while (true) {
-			try {
-				solve(receive());
-			} catch (Exception e) {
-				System.out.println("服务器接收异常");
-				close();
-				e.printStackTrace();
-			}
-		}
-
 	}
 }

@@ -13,12 +13,15 @@ import common.Message;
 import common.ServerSocket;
 import util.SwtUtils;
 
+import java.util.LinkedList;
+
 public class Server1 {
 
     protected Shell shell;
     private Table ulist;
     private Table chatContent;
 
+    public LinkedList<Message> msgs = new LinkedList<Message>();
     ServerSocket serverSocket;
 
     /**
@@ -29,6 +32,32 @@ public class Server1 {
     public static void main(String[] args) {
         try {
             Server1 window = new Server1();
+            //
+            ServerSocket serverSocket = new ServerSocket(11111);
+            //创建接收信息的线程
+            new Thread() {
+                @Override
+                public void run() {
+                    while (true) {
+//                        System.out.print("执行接收");
+                        try {
+                            Message msg = serverSocket.receive();
+                            if (msg == null) {
+                                System.out.println("未收到消息");
+                                sleep(200);
+                                continue;
+                            }
+//                            System.out.println(msg.txt);
+                            // 分发
+                            serverSocket.solve(msg);
+                            window.msgs.addLast(msg);
+                            // 在服务器面板上显示接收到的消息 TODO
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }.start();
             window.open();
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,13 +70,17 @@ public class Server1 {
     public void open() {
         Display display = Display.getDefault();
         createContents();
+
         shell.open();
         shell.layout();
+//        initSocket();
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
+                initSocket();
                 display.sleep();
             }
         }
+
     }
 
     /**
@@ -63,7 +96,6 @@ public class Server1 {
         // 用户列表 用户信息,用户头像
         ulist = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
         ulist.setBounds(10, 10, 225, 621);
-
 
         //column只用于定义列的格式
         TableColumn headshot = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
@@ -91,64 +123,54 @@ public class Server1 {
         TableColumn content = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
         content.setWidth(400);
         addMessage(t, chatContent);
-        initSocket();
+
     }
 
     void initSocket() {
         // 创建服务器套接字
-        serverSocket = new ServerSocket(11111);
         // 添加服务器接收消息的线程
-        Display.getDefault().asyncExec(
-                new Thread() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Message msg = serverSocket.receive();
-                        if(msg==null) {
-                            System.out.println("未收到消息");
-                            sleep(2000);
-                            continue;
-                        }
-                        // 分发
-                        serverSocket.solve(msg);
-                        // 在服务器面板上显示接收到的消息 TODO
-                        switch (msg.flag) {
-                            // 下线
-                            case -1:
-                                addUser(msg, ulist);
-                                addMessage(msg, chatContent);
-                                break;
-                            // 上线
-                            case 1:
-                                removeUser(msg, ulist);
-
-                                addMessage(msg, chatContent);
-                                break;
-                            // 接收到一条群聊
-                            case 0:
-                                addMessage(msg, chatContent);
-                                break;
-                            // 接收到一条私聊
-                            case 3:
-                                addMessage(msg, chatContent);
-                                break;
-                            default:
-                                break;
-                        }
-                        sleep(2000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+//        Display.getDefault().asyncExec(
+//                new Thread() {
+//                    @Override
+//                    public void run() {
+//                        while (true) {
+        if (msgs.isEmpty()) {
+            return;
         }
-//        .start();
-        );
+        System.out.println("处理消息");
+        Message msg = msgs.getFirst();
+        msgs.removeFirst();
+        // 在服务器面板上显示接收到的消息 TODO
+        switch (msg.flag) {
+            // 下线
+            case -1:
+                addUser(msg, ulist);
+                addMessage(msg, chatContent);
+                break;
+            // 上线
+            case 1:
+                removeUser(msg, ulist);
+
+                addMessage(msg, chatContent);
+                break;
+            // 接收到一条群聊
+            case 0:
+                addMessage(msg, chatContent);
+                break;
+            // 接收到一条私聊
+            case 3:
+                addMessage(msg, chatContent);
+                break;
+            default:
+                break;
+        }
+//                        }
+//                    }
+//                }
+//        );
     }
 
     void addUser(Message msg, Table table) {
-        System.out.println(msg.txt);
         // 加一行表格
         TableItem item = new TableItem(table, SWT.NONE);
         item.setText(0, msg.SrcId + "");
@@ -172,12 +194,15 @@ public class Server1 {
         table.redraw();
     }
 
+
     void addMessage(Message msg, Table table) {
         System.out.println(msg.txt);
         // 加一行表格
         TableItem item = new TableItem(table, SWT.NONE);
-        item.setText(0, msg.name);
-        item.setText(2, msg.txt);
+        if (msg.name != null)
+            item.setText(0, msg.name);
+        if (msg.txt != null)
+            item.setText(2, msg.txt);
         table.redraw();
     }
 

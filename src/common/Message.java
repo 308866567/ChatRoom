@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
+    public int id=-1;
     //源
     public int SrcId = 0;//源端口
     public String name="";//源名称
