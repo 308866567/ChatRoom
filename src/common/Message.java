@@ -16,7 +16,8 @@ public class Message implements Serializable {
     //目的
     public int DesId = -1;
     //数据
-    public int flag = -1;// 默认为0,表示为广播,-1表示下线，1表示上线，3表示私聊
+    public int flag = -1;//标志位
+    // 默认为0,表示为广播,-1表示下线，1表示上线，3表示私聊
     public byte[] image;
     public String txt="";
 

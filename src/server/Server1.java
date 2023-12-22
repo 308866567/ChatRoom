@@ -34,30 +34,6 @@ public class Server1 {
             Server1 window = new Server1();
             //
             ServerSocket serverSocket = new ServerSocket(11111);
-            //创建接收信息的线程
-            new Thread() {
-                @Override
-                public void run() {
-                    while (true) {
-//                        System.out.print("执行接收");
-                        try {
-                            Message msg = serverSocket.receive();
-                            if (msg == null) {
-                                System.out.println("未收到消息");
-                                sleep(200);
-                                continue;
-                            }
-//                            System.out.println(msg.txt);
-                            // 分发
-                            serverSocket.solve(msg);
-                            window.msgs.addLast(msg);
-                            // 在服务器面板上显示接收到的消息 TODO
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }.start();
             window.open();
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,7 +56,6 @@ public class Server1 {
                 display.sleep();
             }
         }
-
     }
 
     /**
