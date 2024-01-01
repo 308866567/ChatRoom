@@ -128,7 +128,7 @@ public class Client1 {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				Message msg =new Message();
-				//给msg添加信息
+//				给msg添加信息
 				msg.name=name;
 				userSocket.send(msg);
 			}
@@ -154,7 +154,7 @@ public class Client1 {
 				while (true) {
 //					sleep(500);
 					try {
-						Message msg = userSocket.receive();
+//						Message msg = userSocket.socketReceive();
 						//收到的消息显示在面板上 TODO
 					} catch (Exception e) {
 						e.printStackTrace();
