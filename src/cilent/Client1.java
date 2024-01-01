@@ -1,8 +1,11 @@
 package cilent;
 
+import java.io.ByteArrayInputStream;
+
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -14,6 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -22,9 +26,13 @@ import common.UserSocket;
 import util.SwtUtils;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 
 public class Client1 {
-
+    private Table ulist;
+    private Table chatContent;
 	protected Shell shell;
 	private Table user_list;
 	private Table chat;
@@ -75,37 +83,31 @@ public class Client1 {
 		shell.setSize(900, 700);
 		shell.setText("群聊");
 		
-		//用户列表 显示用户头像,用户名信息 
-		//TODO 双击用户名或用户头像进入单聊
-		TableViewer tableViewer = new TableViewer(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		user_list = tableViewer.getTable();
-		user_list.setTouchEnabled(true);
-		user_list.setBounds(10, 10, 218, 575);
+		// 用户列表 用户信息,用户头像
+        ulist = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
+        ulist.setBounds(10, 10, 225, 622);
+
+        //column只用于定义列的格式
+        TableColumn headshot = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
+        headshot.setWidth(60);
+
+        TableColumn uname = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
+        uname.setWidth(150);
+        TableItem item = new TableItem(ulist, SWT.NONE);
+        item.setText(0, "头像");
+        item.setText(1, "用户名");
+        ulist.redraw();
+
 		
-		TableViewerColumn tableViewerColumn = new TableViewerColumn(tableViewer, SWT.NONE);
-		TableColumn headshot = tableViewerColumn.getColumn();
-		headshot.setWidth(60);
-		headshot.setText("New Column");
-		
-		TableViewerColumn tableViewerColumn_1 = new TableViewerColumn(tableViewer, SWT.NONE);
-		TableColumn uname = tableViewerColumn_1.getColumn();
-		uname.setWidth(150);
-		uname.setText("New Column");
-		
-		//聊天信息显示框
-		TableViewer tableViewer_1 = new TableViewer(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		chat = tableViewer_1.getTable();
-		chat.setBounds(250, 10, 594, 405);
-		
-		TableViewerColumn tableViewerColumn_2 = new TableViewerColumn(tableViewer_1, SWT.NONE);
-		TableColumn userName = tableViewerColumn_2.getColumn();
-		userName.setWidth(150);
-		userName.setText("New Column");
-		
-		TableViewerColumn tableViewerColumn_3 = new TableViewerColumn(tableViewer_1, SWT.NONE);
-		TableColumn tblclmnNewColumn = tableViewerColumn_3.getColumn();
-		tblclmnNewColumn.setWidth(420);
-		tblclmnNewColumn.setText("New Column");
+        chatContent = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
+        chatContent.setBounds(250, 10, 593, 403);
+
+        TableColumn username = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
+        username.setWidth(150);
+
+        TableColumn content = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
+        content.setWidth(400);
+
 		
 		
 		text = new Text(shell, SWT.BORDER | SWT.MULTI);
@@ -137,15 +139,15 @@ public class Client1 {
 		send.setText("发送");
 		
 		Button memes = new Button(shell, SWT.NONE);
-		//TODO 添加点击事件显示一个对话框选择要发送的表情包
-		memes.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				showHeadshots(memes.getLocation().x-200, memes.getLocation().y-170);
-			}
-		});
-		memes.setBounds(636, 602, 100, 30);
-		memes.setText("表情包");
+//		//TODO 添加点击事件显示一个对话框选择要发送的表情包
+//		memes.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseDown(MouseEvent e) {
+//				showHeadshots(memes.getLocation().x-200, memes.getLocation().y-170);
+//			}
+//		});
+//		memes.setBounds(636, 602, 100, 30);
+//		memes.setText("表情包");
 		//客户端套接字
 		userSocket =new UserSocket(name,IP,port);
 		Display.getDefault().asyncExec(new Thread() {
@@ -156,6 +158,7 @@ public class Client1 {
 					try {
 //						Message msg = userSocket.socketReceive();
 						//收到的消息显示在面板上 TODO
+						addMessage(msg,chatContent);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -244,4 +247,67 @@ public class Client1 {
 		SwtUtils.autoImage(lblNewLabel_4);
 		box.open();
 	}
+	
+    void addUser(Message msg, Table table) {
+        // 加一行表格
+        TableItem item = new TableItem(table, SWT.NONE);
+        // 在第一列中插入 Label 控件 显示头像信息
+	      TableEditor editor = new TableEditor(table);
+	      Label label = new Label(table, SWT.NONE);
+	      Image o = SWTResourceManager.getImage("/images/1.jpg");
+	      label.setImage(o);
+//	      label.setImage(toImage(msg.image));
+	      editor.grabHorizontal = true;
+	      editor.setEditor(label, item, 0);
+        item.setText(1, msg.name);
+        item.setData("l", label);
+        table.redraw();
+    }
+    
+    
+    //将massage中的image字节数组转换为image
+    Image toImage(byte[] bytes) {
+        ImageLoader imageLoader = new ImageLoader();
+        imageLoader.load(new ByteArrayInputStream(bytes));
+
+        ImageData[] imageDataArray = imageLoader.data;
+        if (imageDataArray.length > 0) {
+            return new Image(Display.getDefault(), imageDataArray[0]);
+        } else {
+            return null;
+        }
+    }
+
+
+    void removeUser(Message msg, Table table) {
+        System.out.println(msg.txt);
+        String name = msg.name;
+        // 删除一行表格
+        TableItem[] items = table.getItems();
+       
+        for (TableItem item : items) {
+        	
+            if (item.getText(1).equals(name)) {
+                // 移除这个Item从表格
+                Label t =(Label)item.getData("l");
+                t.dispose();
+            	item.dispose();
+                break;
+            }
+        }
+        table.redraw();
+    }
+
+
+    void addMessage(Message msg, Table table) {
+        System.out.println(msg.txt);
+        // 加一行表格
+        TableItem item = new TableItem(table, SWT.NONE);
+        if (msg.name != null)
+            item.setText(0, msg.name);
+        if (msg.txt != null)
+            item.setText(1, msg.txt);
+        
+        table.redraw();
+    }
 }
