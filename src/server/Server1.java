@@ -23,6 +23,7 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
@@ -35,10 +36,11 @@ public class Server1 {
     protected Shell shell;
     private Table ulist;
     private Table chatContent;
-
-    public LinkedList<Message> msgs = new LinkedList<Message>();
-    ServerSocket serverSocket;
     private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
+
+    //套接字
+    int port=11111;
+    ServerSocket serverSocket = new ServerSocket(port);
 
     /**
      * Launch the application.
@@ -48,9 +50,9 @@ public class Server1 {
     public static void main(String[] args) {
         try {
             Server1 window = new Server1();
-            //
-//            ServerSocket serverSocket = new ServerSocket(11111);
             window.open();
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,16 +64,33 @@ public class Server1 {
     public void open() {
         Display display = Display.getDefault();
         createContents();
+        //TODO 添加接收线程
+        Thread rec = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    serverSocket.receiveMessage();
+                }
+            }
+        });
+        rec.start();
+
+
+
 
         shell.open();
         shell.layout();
-//        initSocket();
-        int i=0;
         while (!shell.isDisposed()) {
-        	//TODO 
-//        	addMessage("新消息"+(++i),chatContent);
+            //TODO 显示消息
+            Message t = serverSocket.getMessage();
+            if (t != null) {
+                System.out.println("\n-------------------\n");
+                System.out.println(t);
+                System.out.println("\n-------------------\n");
+                solveMessage(t);
+            }
+            //
             if (!display.readAndDispatch()) {
-                initSocket();
                 display.sleep();
             }
         }
@@ -103,103 +122,59 @@ public class Server1 {
         item.setText(1, "用户名");
         ulist.redraw();
 
-        //添加一行
-        Message t = new Message();
-        t.name = "服务器0";
-        t.txt = "欢迎来到服务器";
-        t.SrcId = 0;
-        addUser(t, ulist);
-        removeUser(t,ulist);
-
         //消息框
         chatContent = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
         chatContent.setBounds(241, 10, 620, 621);
 
         TableColumn username = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
-        username.setWidth(150);
+        username.setWidth(100);
 
         TableColumn cstate = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
-        cstate.setWidth(50);
+        cstate.setWidth(100);
 
         TableColumn content = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
         content.setWidth(400);
         TableItem item1 = new TableItem(chatContent, SWT.NONE);
         item1.setText(0, "用户名");
-        item1.setText(1, "状态");
+        item1.setText(1, "消息类型");
         item1.setText(2, "内容");
-        ulist.redraw();
-        addMessage(t, chatContent);
 
+//        Message msg=new Message(999,"用户1","消息1");
+//        msg.flag=1;
+//        for (int i=0;i<100;i++)
+//         addMessage(msg, chatContent);
+//        addUser(msg, ulist);
+//        addUser(msg, ulist);
+//        removeUser(msg,ulist);
     }
 
-    void initSocket() {
-        // 创建服务器套接字
-        // 添加服务器接收消息的线程
-//        Display.getDefault().asyncExec(
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        while (true) {
-        if (msgs.isEmpty()) {
-            return;
-        }
-        System.out.println("处理消息");
-        Message msg = msgs.getFirst();
-        msgs.removeFirst();
+    void solveMessage(  Message msg ) {
+        System.out.println("UI处理消息"+msg.flag);
         // 在服务器面板上显示接收到的消息 TODO
         switch (msg.flag) {
             // 下线
             case -1:
-                addUser(msg, ulist);
+                System.out.println("删除");
+                removeUser(msg, ulist);
                 addMessage(msg, chatContent);
                 break;
             // 上线
             case 1:
-//                removeUser(msg, ulist);
-
                 addMessage(msg, chatContent);
-                break;
-            // 接收到一条群聊
-            case 0:
-                addMessage(msg, chatContent);
-                break;
-            // 接收到一条私聊
-            case 3:
-                addMessage(msg, chatContent);
+                addUser(msg, ulist);
                 break;
             default:
+                addMessage(msg, chatContent);
                 break;
         }
-//                        }
-//                    }
-//                }
-//        );
     }
 
-    void addUser(Message msg, Table table) {
-        // 加一行表格
-        TableItem item = new TableItem(table, SWT.NONE);
-        // 在第一列中插入 Label 控件 显示头像信息
-	      TableEditor editor = new TableEditor(table);
-	      Label label = new Label(table, SWT.NONE);
-	      Image o = SWTResourceManager.getImage("/images/1.jpg");
-	      label.setImage(o);
-//	      label.setImage(toImage(msg.image));
-	      editor.grabHorizontal = true;
-	      editor.setEditor(label, item, 0);
-//        item.setText(0, msg.SrcId + "");
-        item.setText(1, msg.name);
-        item.setData("l", label);
-        table.redraw();
-//        return label;
-    }
     
     
     //将massage中的image字节数组转换为image
     Image toImage(byte[] bytes) {
         ImageLoader imageLoader = new ImageLoader();
         imageLoader.load(new ByteArrayInputStream(bytes));
-
         ImageData[] imageDataArray = imageLoader.data;
         if (imageDataArray.length > 0) {
 //            return new Image(display, imageDataArray[0]);
@@ -209,29 +184,53 @@ public class Server1 {
         }
     }
 
+    HashMap<String,TableItem> userItem=new HashMap<>();
+
+
+    void addUser(Message msg, Table table) {
+        // 加一行表格
+        TableItem item = new TableItem(table, SWT.NONE);
+        // 在第一列中插入 Label 控件 显示头像信息
+        TableEditor editor = new TableEditor(table);
+        Label label = new Label(table, SWT.NONE);
+        Image o = SWTResourceManager.getImage("/images/1.jpg");
+        label.setImage(o);
+//	      label.setImage(toImage(msg.image));
+        editor.grabHorizontal = true;
+        editor.setEditor(label, item, 0);
+//        item.setText(0, msg.SrcId + "");
+        item.setText(1, msg.name+"");
+        item.setData("l", label);
+        item.setData("id", msg.SrcId+"");
+        userItem.put(msg.SrcId+"",item);//放哈希
+        table.redraw();
+//        return label;
+    }
+
+
     //未测试
+    // 删除一行用户
     void removeUser(Message msg, Table table) {
-        System.out.println(msg.txt);
-        String name = msg.name;
-        // 删除一行表格
         TableItem[] items = table.getItems();
-       
         for (TableItem item : items) {
-        	
-            if (item.getText(1).equals(name)) {
-                // 移除这个Item从表格
-//                table.remove(table.indexOf(item));
-                // 获取 TableItem 的第一列的控件（即Label）
-               
-                
-//                item.setData("l", items);
+            if ((item.getData("id")+"").equals(msg.SrcId+"")) {
                 Label t =(Label)item.getData("l");
-//                Label t =(Label)item.getData();
                 t.dispose();
             	item.dispose();
                 break;
             }
         }
+
+//        System.out.println("删除"+msg.SrcId);
+//        TableItem item=userItem.get(msg.SrcId+"");
+//        if(item==null) {
+//            System.out.println("item空");
+//            return;
+//        }
+//        Label t =(Label)item.getData("l");
+//        t.dispose();
+//        item.dispose();
+
         table.redraw();
     }
 
@@ -245,16 +244,22 @@ public class Server1 {
         if (msg.txt != null)
             item.setText(2, msg.txt);
         switch (msg.flag) {
+            case 1:
+                item.setText(1,"上线消息");
+                break;
+            case -1:
+                item.setText(1,"下线消息");
+                break;
 	        // 接收到一条群聊
 	        case 0:
-	        	item.setText(1,"群聊");
+	        	item.setText(1,"群聊消息");
 	            break;
 	        // 接收到一条私聊
 	        case 3:
-	        	item.setText(1,"私聊");
+	        	item.setText(1,"私聊消息");
 	            break;
 	        default:
-	        	item.setText(1,"未知");
+	        	item.setText(1,"未知消息");
         }
         
         table.redraw();

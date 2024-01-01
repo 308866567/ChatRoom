@@ -158,10 +158,11 @@ public class UserSocket {
         return null;
     }
 
+
     public void close() {
         //发送上线通知
-        Message t = new Message(id, name, name + "上线");
-        t.flag = 1;
+        Message t = new Message(id, name, name + "下线");
+        t.flag = -1;
         send(t);
         datagramSocket.close();
     }

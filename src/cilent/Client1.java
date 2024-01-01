@@ -2,6 +2,7 @@ package cilent;
 
 import java.io.ByteArrayInputStream;
 
+import common.ServerSocket;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -31,59 +32,99 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 
 public class Client1 {
-    private Table ulist;
+    private Table ulist;//用户列表
     private Table chatContent;
-	protected Shell shell;
-	private Table user_list;
-	private Table chat;
-	private Text text;
-	String messageString;
-	private String imgPath = "";
-	// 套接字
-	UserSocket userSocket;
-	String name;
-	String IP;
-	int port;
-	
+    protected Shell shell;
+    private Text text;
+    String messageString;
+    private String imgPath = "";
 
-	/**
-	 * Launch the application.
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			Client1 window = new Client1();
-			window.open();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    String name = "用户";
+    String ip = "127.0.0.1";
+    int port = 11111;
+    // 套接字
+    UserSocket userSocket = new UserSocket(name, ip, port);
 
-	/**
-	 * Open the window.
-	 */
-	public void open() {
-		Display display = Display.getDefault();
-		createContents();
-		shell.open();
-		shell.layout();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
+
+    /**
+     * Launch the application.
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        try {
+            Client1 window = new Client1();
+
+            window.open();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Open the window.
+     */
+    public void open() {
+        Display display = Display.getDefault();
+        createContents();
+        shell.open();
+        shell.layout();
+//TODO 添加接收线程
+        Thread rec = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    userSocket.receiveMessage();
+                }
+            }
+        });
+
+		Thread send = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					if (!userSocket.sendMessage()) {
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Message t=userSocket.initMessage();
+							t.txt="下线";
+							t.flag=-1;
+							userSocket.addMessage(t);
+							return;
+//                            throw new RuntimeException(e);
+						}
+					}
+				}
 			}
-		}
-	}
+		});
+		send.start();
+        rec.start();
+        while (!shell.isDisposed()) {
+			//TODO 显示消息
+            Message t = userSocket.getMessage();
+            if (t != null) {
+                System.out.println("\n-------------------\n");
+                System.out.println(t);
+                System.out.println("\n-------------------\n");
+                solveMessage(t);
+            }
+//
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+    }
 
-	/**
-	 * Create contents of the window.
-	 */
-	protected void createContents() {
-		shell = new Shell();
-		shell.setSize(900, 700);
-		shell.setText("群聊");
-		
-		// 用户列表 用户信息,用户头像
+    /**
+     * Create contents of the window.
+     */
+    protected void createContents() {
+        shell = new Shell();
+        shell.setSize(900, 700);
+        shell.setText("群聊");
+
+        // 用户列表 用户信息,用户头像
         ulist = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
         ulist.setBounds(10, 10, 225, 622);
 
@@ -98,7 +139,7 @@ public class Client1 {
         item.setText(1, "用户名");
         ulist.redraw();
 
-		
+
         chatContent = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
         chatContent.setBounds(250, 10, 593, 403);
 
@@ -108,38 +149,43 @@ public class Client1 {
         TableColumn content = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
         content.setWidth(400);
 
-		
-		
-		text = new Text(shell, SWT.BORDER | SWT.MULTI);
-		text.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				messageString = text.getText();
-			}
-		});
-		text.setBounds(250, 434, 594, 151);
-		
-		Button send = new Button(shell, SWT.NONE);
-		send.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-		});
-		//TODO 发送按钮 添加事件发送表情包或文字信息
-		send.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				Message msg =new Message();
-//				给msg添加信息
-				msg.name=name;
-				userSocket.send(msg);
-			}
-		});
-		send.setBounds(744, 602, 100, 30);
-		send.setText("发送");
-		
-		Button memes = new Button(shell, SWT.NONE);
-//		//TODO 添加点击事件显示一个对话框选择要发送的表情包
+
+        text = new Text(shell, SWT.BORDER | SWT.MULTI);
+        text.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                messageString = text.getText();
+            }
+        });
+        text.setBounds(250, 434, 594, 151);
+
+        Button send = new Button(shell, SWT.NONE);
+        send.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+
+
+            }
+        });
+        send.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                //TODO 发送按钮 发送消息
+				System.out.println("发送");
+				Message t=userSocket.initMessage();
+				t.txt=text.getText();
+                if(t.txt==null)
+                    t.txt="";
+				t.flag=-1;
+				userSocket.addMessage(t);
+                text.setText("");
+            }
+        });
+        send.setBounds(744, 602, 100, 30);
+        send.setText("发送");
+
+//		Button memes = new Button(shell, SWT.NONE);
+//		// 添加点击事件显示一个对话框选择要发送的表情包
 //		memes.addMouseListener(new MouseAdapter() {
 //			@Override
 //			public void mouseDown(MouseEvent e) {
@@ -148,123 +194,127 @@ public class Client1 {
 //		});
 //		memes.setBounds(636, 602, 100, 30);
 //		memes.setText("表情包");
-		//客户端套接字
-		userSocket =new UserSocket(name,IP,port);
-		Display.getDefault().asyncExec(new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-//					sleep(500);
-					try {
-//						Message msg = userSocket.socketReceive();
-						//收到的消息显示在面板上 TODO
-						addMessage(msg,chatContent);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
+        //客户端套接字
+    }
 
-			}
-		});
-	}
 
-	// 表情包选择框
-	private void showHeadshots(int x, int y) {
-		Shell box = new Shell(shell, SWT.ON_TOP | SWT.CLOSE);
-		box.setSize(400, 300);
-		box.setLocation(x, y);
+    void solveMessage(Message msg) {
+        System.out.println("UI处理消息" + msg.flag);
+        switch (msg.flag) {
+            // 下线
+            case -1:
+                System.out.println("删除");
+                removeUser(msg, ulist);
+                addMessage(msg, chatContent);
+                break;
+            // 上线
+            case 1:
+                addMessage(msg, chatContent);
+                addUser(msg, ulist);
+                break;
+            default:
+                addMessage(msg, chatContent);
+                break;
+        }
+    }
 
-		Label lblNewLabel = new Label(box, SWT.NONE);
-		lblNewLabel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				imgPath = "/images/1.jpg";
-			}
-		});
-		lblNewLabel.setImage(SWTResourceManager.getImage(demo.class, "/images/1.jpg"));
-		lblNewLabel.setBounds(25, 20, 100, 100);
-		SwtUtils.autoImage(lblNewLabel);
+    // 表情包选择框
+    private void showHeadshots(int x, int y) {
+        Shell box = new Shell(shell, SWT.ON_TOP | SWT.CLOSE);
+        box.setSize(400, 300);
+        box.setLocation(x, y);
 
-		Label lblNewLabel_1 = new Label(box, SWT.NONE);
-		lblNewLabel_1.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				imgPath = "/images/2.jpg";
-			}
-		});
-		lblNewLabel_1.setImage(SWTResourceManager.getImage(demo.class, "/images/2.jpg"));
-		lblNewLabel_1.setBounds(150, 20, 100, 100);
-		SwtUtils.autoImage(lblNewLabel_1);
+        Label lblNewLabel = new Label(box, SWT.NONE);
+        lblNewLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                imgPath = "/images/1.jpg";
+            }
+        });
+        lblNewLabel.setImage(SWTResourceManager.getImage(demo.class, "/images/1.jpg"));
+        lblNewLabel.setBounds(25, 20, 100, 100);
+        SwtUtils.autoImage(lblNewLabel);
 
-		Label lblNewLabel_1_1 = new Label(box, SWT.NONE);
-		lblNewLabel_1_1.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				imgPath = "/images/3.jpg";
-			}
-		});
-		lblNewLabel_1_1.setImage(SWTResourceManager.getImage(demo.class, "/images/3.jpg"));
-		SwtUtils.autoImage(lblNewLabel_1_1);
-		lblNewLabel_1_1.setBounds(275, 20, 100, 100);
+        Label lblNewLabel_1 = new Label(box, SWT.NONE);
+        lblNewLabel_1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                imgPath = "/images/2.jpg";
+            }
+        });
+        lblNewLabel_1.setImage(SWTResourceManager.getImage(demo.class, "/images/2.jpg"));
+        lblNewLabel_1.setBounds(150, 20, 100, 100);
+        SwtUtils.autoImage(lblNewLabel_1);
 
-		Label lblNewLabel_2 = new Label(box, SWT.NONE);
-		lblNewLabel_2.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				imgPath = "/images/4.jpg";
-			}
-		});
-		lblNewLabel_2.setImage(SWTResourceManager.getImage(demo.class, "/images/4.jpg"));
-		lblNewLabel_2.setBounds(25, 140, 100, 100);
-		SwtUtils.autoImage(lblNewLabel_2);
+        Label lblNewLabel_1_1 = new Label(box, SWT.NONE);
+        lblNewLabel_1_1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                imgPath = "/images/3.jpg";
+            }
+        });
+        lblNewLabel_1_1.setImage(SWTResourceManager.getImage(demo.class, "/images/3.jpg"));
+        SwtUtils.autoImage(lblNewLabel_1_1);
+        lblNewLabel_1_1.setBounds(275, 20, 100, 100);
 
-		Label lblNewLabel_3 = new Label(box, SWT.NONE);
-		lblNewLabel_3.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				imgPath = "/images/5.jpg";
-			}
-		});
-		lblNewLabel_3.setImage(SWTResourceManager.getImage(demo.class, "/images/5.jpg"));
-		lblNewLabel_3.setBounds(150, 140, 100, 100);
-		SwtUtils.autoImage(lblNewLabel_3);
+        Label lblNewLabel_2 = new Label(box, SWT.NONE);
+        lblNewLabel_2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                imgPath = "/images/4.jpg";
+            }
+        });
+        lblNewLabel_2.setImage(SWTResourceManager.getImage(demo.class, "/images/4.jpg"));
+        lblNewLabel_2.setBounds(25, 140, 100, 100);
+        SwtUtils.autoImage(lblNewLabel_2);
 
-		// 更多 鼠标点击从本地选择图片文件上传
-		Label lblNewLabel_4 = new Label(box, SWT.NONE);
-		lblNewLabel_4.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
-				fileDialog.setFilterExtensions(new String[] { "*.jpg;*.png;*.gif;*.bmp" });
-				// 获取文件地址
-				String filePath = fileDialog.open();
-				imgPath = filePath;
-			}
-		});
-		lblNewLabel_4.setToolTipText("双击选择本地图片");
-		lblNewLabel_4.setImage(SWTResourceManager.getImage(demo.class, "/images/more.png"));
-		lblNewLabel_4.setBounds(275, 140, 100, 100);
-		SwtUtils.autoImage(lblNewLabel_4);
-		box.open();
-	}
-	
+        Label lblNewLabel_3 = new Label(box, SWT.NONE);
+        lblNewLabel_3.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                imgPath = "/images/5.jpg";
+            }
+        });
+        lblNewLabel_3.setImage(SWTResourceManager.getImage(demo.class, "/images/5.jpg"));
+        lblNewLabel_3.setBounds(150, 140, 100, 100);
+        SwtUtils.autoImage(lblNewLabel_3);
+
+        // 更多 鼠标点击从本地选择图片文件上传
+        Label lblNewLabel_4 = new Label(box, SWT.NONE);
+        lblNewLabel_4.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDoubleClick(MouseEvent e) {
+                FileDialog fileDialog = new FileDialog(shell, SWT.OPEN);
+                fileDialog.setFilterExtensions(new String[]{"*.jpg;*.png;*.gif;*.bmp"});
+                // 获取文件地址
+                String filePath = fileDialog.open();
+                imgPath = filePath;
+            }
+        });
+        lblNewLabel_4.setToolTipText("双击选择本地图片");
+        lblNewLabel_4.setImage(SWTResourceManager.getImage(demo.class, "/images/more.png"));
+        lblNewLabel_4.setBounds(275, 140, 100, 100);
+        SwtUtils.autoImage(lblNewLabel_4);
+        box.open();
+    }
+
     void addUser(Message msg, Table table) {
         // 加一行表格
         TableItem item = new TableItem(table, SWT.NONE);
         // 在第一列中插入 Label 控件 显示头像信息
-	      TableEditor editor = new TableEditor(table);
-	      Label label = new Label(table, SWT.NONE);
-	      Image o = SWTResourceManager.getImage("/images/1.jpg");
-	      label.setImage(o);
+        TableEditor editor = new TableEditor(table);
+        Label label = new Label(table, SWT.NONE);
+        Image o = SWTResourceManager.getImage("/images/1.jpg");
+        label.setImage(o);
 //	      label.setImage(toImage(msg.image));
-	      editor.grabHorizontal = true;
-	      editor.setEditor(label, item, 0);
+        editor.grabHorizontal = true;
+        editor.setEditor(label, item, 0);
         item.setText(1, msg.name);
         item.setData("l", label);
         table.redraw();
     }
-    
-    
+
+
     //将massage中的image字节数组转换为image
     Image toImage(byte[] bytes) {
         ImageLoader imageLoader = new ImageLoader();
@@ -284,14 +334,14 @@ public class Client1 {
         String name = msg.name;
         // 删除一行表格
         TableItem[] items = table.getItems();
-       
+
         for (TableItem item : items) {
-        	
+
             if (item.getText(1).equals(name)) {
                 // 移除这个Item从表格
-                Label t =(Label)item.getData("l");
+                Label t = (Label) item.getData("l");
                 t.dispose();
-            	item.dispose();
+                item.dispose();
                 break;
             }
         }
@@ -307,7 +357,7 @@ public class Client1 {
             item.setText(0, msg.name);
         if (msg.txt != null)
             item.setText(1, msg.txt);
-        
+
         table.redraw();
     }
 }

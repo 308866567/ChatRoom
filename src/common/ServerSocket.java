@@ -133,11 +133,17 @@ public class ServerSocket {
             case -1:
                 users.remove(msg.DesId);
                 System.out.println(msg.txt);
+                for (Integer t : users) {
+                    send(msg, "127.0.0.1", t);
+                }
                 break;
             // 上线
             case 1:
                 users.add(msg.SrcId);
                 System.out.println(msg.txt);
+                for (Integer t : users) {
+                    send(msg, "127.0.0.1", t);
+                }
                 break;
             // 群聊
             case 0:

@@ -1,5 +1,7 @@
 package common;
 
+import java.net.SocketException;
+
 public class server {
     //接收线程
     public static void main(String[] args) {
@@ -9,6 +11,11 @@ public class server {
             @Override
             public void run() {
                 while (true) {
+                    try {
+                        serverSocket.datagramSocket.setSoTimeout(500);
+                    } catch (SocketException e) {
+                        throw new RuntimeException(e);
+                    }
                     serverSocket.receiveMessage();
                 }
             }
@@ -37,6 +44,6 @@ public class server {
         rec.start();
         get.start();
 //        System.out.println("开启了线程");
-//        serverSocket.close();
+        serverSocket.close();
     }
 }
