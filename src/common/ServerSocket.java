@@ -13,6 +13,7 @@ import static java.lang.Thread.sleep;
 public class ServerSocket implements Runnable {
     int port;//服务端监听的端口号
     String name = "服务器";//服务端名称
+    //临界资源
     DatagramSocket datagramSocket;//UDP套接字
     int messageSize = 0;//消息标志
     HashSet<Integer> users;//用于存储客户端的源地址
@@ -29,7 +30,7 @@ public class ServerSocket implements Runnable {
         }
     }
 
-    // 给客户端发送消息,需传入客户端地址
+    // 给一个网络地址发送消息
     public void send(Message msg, String IP, int port) {
         //检查传入的参数正确性 TODO
         if (msg == null || IP == null) {
@@ -56,11 +57,13 @@ public class ServerSocket implements Runnable {
         }
     }
 
-    // 接受来自客户端的消息,进行处理和分发
+    //用于接收的缓冲区,只有receive函数使用
+    byte[] buffer = new byte[1024 * 64];
+    DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
+    // 接受所监听端口的消息,进行处理和分发
+
     public Message receive() {
-        //创建用于接收的数据包 TODO 可以优化为静态缓冲区
-        byte[] buffer = new byte[1024 * 64];
-        DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
+        //接收的数据包
         try {
             datagramSocket.receive(datagramPacket);
         } catch (IOException e) {
@@ -70,9 +73,9 @@ public class ServerSocket implements Runnable {
         int len = datagramPacket.getLength();
         byte[] t = new byte[len];
         System.arraycopy(buffer, 0, t, 0, len);
-        //接收到的数据包转化为Message
+        //字节数组,反序列化转化为Message
         Message msg = Message.getMessage(t);
-        //新消息放入消息队列等待处理 TODO
+        //新接收到的消息放入消息队列等待处理 TODO
         msg.id = ++messageSize;
         return msg;
     }
