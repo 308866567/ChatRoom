@@ -164,6 +164,6 @@ public class UserSocket {
         Message t = new Message(id, name, name + "下线");
         t.flag = -1;
         send(t);
-        datagramSocket.close();
+//        datagramSocket.close();
     }
 }

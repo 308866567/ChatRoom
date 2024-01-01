@@ -113,12 +113,12 @@ public class Server1 {
 
         //column只用于定义列的格式
         TableColumn headshot = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
-        headshot.setWidth(60);
+        headshot.setWidth(110);
 
         TableColumn uname = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
-        uname.setWidth(150);
+        uname.setWidth(110);
         TableItem item = new TableItem(ulist, SWT.NONE);
-        item.setText(0, "头像");
+        item.setText(0, "用户端口号");
         item.setText(1, "用户名");
         ulist.redraw();
 
@@ -190,19 +190,23 @@ public class Server1 {
     void addUser(Message msg, Table table) {
         // 加一行表格
         TableItem item = new TableItem(table, SWT.NONE);
-        // 在第一列中插入 Label 控件 显示头像信息
-        TableEditor editor = new TableEditor(table);
-        Label label = new Label(table, SWT.NONE);
-        Image o = SWTResourceManager.getImage("/images/1.jpg");
-        label.setImage(o);
-//	      label.setImage(toImage(msg.image));
-        editor.grabHorizontal = true;
-        editor.setEditor(label, item, 0);
-//        item.setText(0, msg.SrcId + "");
+        item.setText(0,msg.SrcId+"");
         item.setText(1, msg.name+"");
-        item.setData("l", label);
-        item.setData("id", msg.SrcId+"");
-        userItem.put(msg.SrcId+"",item);//放哈希
+        table.setData(msg.SrcId+"",item);
+//        TableItem item = (TableItem )   table.getData(msg.SrcId+"");
+        table.redraw();
+        // 在第一列中插入 Label 控件 显示头像信息
+//        TableEditor editor = new TableEditor(table);
+//        Label label = new Label(table, SWT.NONE);
+//        Image o = SWTResourceManager.getImage("/images/1.jpg");
+//        label.setImage(o);
+////	      label.setImage(toImage(msg.image));
+//        editor.grabHorizontal = true;
+////        editor.setEditor(label, item, 0);
+////        item.setText(0, msg.SrcId + "");
+//        item.setData("l", label);
+//        item.setData("id", msg.SrcId+"");
+//        userItem.put(msg.SrcId+"",item);//放哈希
         table.redraw();
 //        return label;
     }
@@ -211,26 +215,25 @@ public class Server1 {
     //未测试
     // 删除一行用户
     void removeUser(Message msg, Table table) {
-        TableItem[] items = table.getItems();
-        for (TableItem item : items) {
-            if ((item.getData("id")+"").equals(msg.SrcId+"")) {
-                Label t =(Label)item.getData("l");
-                t.dispose();
-            	item.dispose();
-                break;
-            }
-        }
+
+//        TableItem[] items = table.getItems();
+//        for (TableItem item : items) {
+//            if ((item.getData("id")+"").equals(msg.SrcId+"")) {
+//                Label t =(Label)item.getData("l");
+//                t.dispose();
+//            	item.dispose();
+//                break;
+//            }
+//        }
 
 //        System.out.println("删除"+msg.SrcId);
 //        TableItem item=userItem.get(msg.SrcId+"");
-//        if(item==null) {
-//            System.out.println("item空");
-//            return;
-//        }
-//        Label t =(Label)item.getData("l");
-//        t.dispose();
-//        item.dispose();
-
+        TableItem item = (TableItem )   table.getData(msg.SrcId+"");
+        if(item==null) {
+            System.out.println("item空");
+            return;
+        }
+        item.dispose();
         table.redraw();
     }
 

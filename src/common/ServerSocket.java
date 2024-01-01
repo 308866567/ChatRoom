@@ -134,10 +134,11 @@ public class ServerSocket {
             case -1:
                 users.remove(msg.DesId);
                 System.out.println(msg.txt);
-                for (Message t : users.values()) {
-                    if(t.SrcId!=msg.SrcId) {
-                        send(msg, "127.0.0.1", t.SrcId);
-//                        send(msg, "127.0.0.1", );
+
+                for (Message user : users.values()) {
+                    if(user.SrcId!=msg.SrcId) {
+                        send(msg, "127.0.0.1", user.SrcId);//通知其他用户
+
                     }
                 }
                 break;
@@ -145,9 +146,14 @@ public class ServerSocket {
             case 1:
                 users.put(msg.SrcId,msg);
                 System.out.println(msg.txt);
-                for (Message t : users.values()) {
-                    if(t.SrcId==msg.SrcId) continue;
-                    send(msg, "127.0.0.1", t.SrcId);
+                for (Message user : users.values()) {
+                    if(user.SrcId!=msg.SrcId) {
+                        send(msg, "127.0.0.1", user.SrcId);
+                        //给t发一份
+                        Message u=new Message(user.SrcId,user.name,"当前在线用户:"+user.name);
+                        u.flag=1;
+                        send(u,"127.0.0.1",msg.SrcId);
+                    }
                 }
                 break;
             // 群聊

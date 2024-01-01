@@ -69,7 +69,7 @@ public class Client1 {
         createContents();
         shell.open();
         shell.layout();
-//TODO 添加接收线程
+        //TODO 添加接收线程
         Thread rec = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -114,6 +114,7 @@ public class Client1 {
                 display.sleep();
             }
         }
+        userSocket.close();
     }
 
     /**
@@ -176,7 +177,7 @@ public class Client1 {
 				t.txt=text.getText();
                 if(t.txt==null)
                     t.txt="";
-				t.flag=-1;
+				t.flag=0;
 				userSocket.addMessage(t);
                 text.setText("");
             }
@@ -301,16 +302,11 @@ public class Client1 {
     void addUser(Message msg, Table table) {
         // 加一行表格
         TableItem item = new TableItem(table, SWT.NONE);
-        // 在第一列中插入 Label 控件 显示头像信息
-        TableEditor editor = new TableEditor(table);
-        Label label = new Label(table, SWT.NONE);
-        Image o = SWTResourceManager.getImage("/images/1.jpg");
-        label.setImage(o);
-//	      label.setImage(toImage(msg.image));
-        editor.grabHorizontal = true;
-        editor.setEditor(label, item, 0);
-        item.setText(1, msg.name);
-        item.setData("l", label);
+        item.setText(0,msg.SrcId+"");
+        item.setText(1, msg.name+"");
+        table.setData(msg.SrcId+"",item);
+//        TableItem item = (TableItem )   table.getData(msg.SrcId+"");
+        table.redraw();
         table.redraw();
     }
 
@@ -330,21 +326,27 @@ public class Client1 {
 
 
     void removeUser(Message msg, Table table) {
-        System.out.println(msg.txt);
-        String name = msg.name;
-        // 删除一行表格
-        TableItem[] items = table.getItems();
-
-        for (TableItem item : items) {
-
-            if (item.getText(1).equals(name)) {
-                // 移除这个Item从表格
-                Label t = (Label) item.getData("l");
-                t.dispose();
-                item.dispose();
-                break;
-            }
+//        System.out.println(msg.txt);
+//        String name = msg.name;
+//        // 删除一行表格
+//        TableItem[] items = table.getItems();
+//
+//        for (TableItem item : items) {
+//
+//            if (item.getText(1).equals(name)) {
+//                // 移除这个Item从表格
+//                Label t = (Label) item.getData("l");
+//                t.dispose();
+//                item.dispose();
+//                break;
+//            }
+//        }
+        TableItem item = (TableItem )   table.getData(msg.SrcId+"");
+        if(item==null) {
+            System.out.println("item空");
+            return;
         }
+        item.dispose();
         table.redraw();
     }
 
