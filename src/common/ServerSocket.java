@@ -46,7 +46,7 @@ public class ServerSocket {
         if (flag_list == 0) {
             if (!list.isEmpty()) {
                 Message t = list.pollLast();
-                System.out.println(t);
+//                System.out.println(t);
                 return t;
             } else {
                 System.out.println("没有消息");
@@ -142,12 +142,12 @@ public class ServerSocket {
             // 群聊
             case 0:
                 for (Integer t : users) {
-                    if (t != msg.SrcId)
                         send(msg, "127.0.0.1", t);
                 }
                 break;
             // 私聊
             case 3:
+                System.out.println("\n\n\n这是一条私聊!!!!!");
                 send(msg, "127.0.0.1", msg.DesId);
                 break;
         }
