@@ -54,9 +54,9 @@ public class user {
 
         //发送测试消息
         Message t=userSocket.initMessage();
-        t.txt="消息1私聊";
-        t.flag=3;
-        t.DesId=t.SrcId;
+        t.txt="消息聊";
+//        t.flag=3;//3表示私聊
+//        t.DesId=t.SrcId;
         userSocket.addMessage(t);
 //		userSocket.sendAll("群聊消息");
 //		userSocket.sendAll("私聊消息,标志位3");

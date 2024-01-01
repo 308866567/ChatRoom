@@ -10,10 +10,10 @@ import java.io.Serializable;
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
     //源
-    int SrcId;//源id
+    int SrcId;//源端口号
     String name;//源名称
     //目的
-    public int DesId = -1;//目的id
+    public int DesId = -1;//目的端口号
     //数据
     public int flag = 0;//标志位
     // 默认为0,表示为广播,-1表示下线，1表示上线，3表示私聊

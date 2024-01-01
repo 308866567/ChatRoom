@@ -24,17 +24,17 @@ public class UserSocket {
         try {
             Message msg = socketReceive();//阻塞,接收到了才会执行
             if (msg == null) {
-                System.out.println("消息为空");
+//                System.out.println("消息为空");
                 return;
             }
-            System.out.println("接收到消息");
+//            System.out.println("接收到消息");
             //接收到的消息放到队列里
             flag_list = 1;
             list.push(msg);
             flag_list = 0;
-            System.out.println("消息处理完成");
+//            System.out.println("消息处理完成");
         } catch (Exception e) {
-            System.out.println("服务端接收线程超时或出错");
+            System.out.println("客户端接收线程超时或出错");
             e.printStackTrace();
         }
     }
@@ -49,11 +49,11 @@ public class UserSocket {
 //                System.out.println(t);
                 return t;
             } else {
-                System.out.println("没有接收到消息");
+//                System.out.println("没有接收到消息");
             }
             flag_list = 0;
         }
-        System.out.println("list正在被使用");
+//        System.out.println("list正在被使用");
         return null;
     }
 
@@ -71,11 +71,11 @@ public class UserSocket {
                 return true;
 //                System.out.println(t);
             } else {
-                System.out.println("没有要发送的消息");
+//                System.out.println("没有要发送的消息");
             }
             flag_sendList = 0;
         }
-        System.out.println("发送,sendList正在被使用");
+//        System.out.println("发送,sendList正在被使用");
         flag_sendList = 0;
         return false;
     }
@@ -87,7 +87,7 @@ public class UserSocket {
             sendList.push(msg);
             flag_sendList = 0;
         } else {
-            System.out.println("添加,sendList正在被使用");
+//            System.out.println("添加,sendList正在被使用");
         }
         return;
     }
@@ -119,7 +119,7 @@ public class UserSocket {
     void send(Message msg) {
         //检查传入的参数正确性
         if (msg == null) {
-            System.out.println("消息为空");
+            System.out.println("发送的消息为空");
             return;
         }
         //消息转为字节流,进行发送
@@ -131,7 +131,7 @@ public class UserSocket {
             datagramPacket = new DatagramPacket(t, t.length, address);
             datagramSocket.send(datagramPacket);
         } catch (Exception e) {
-            System.out.println("服务器发包失败");
+            System.out.println("客户端发包失败");
             e.printStackTrace();
         }
     }
