@@ -2,6 +2,7 @@ package common;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -13,7 +14,7 @@ public class ServerSocket {
     String name = "服务器";//服务端名称
     //临界资源
     DatagramSocket datagramSocket;//UDP套接字
-    HashSet<Integer> users;//用于存储客户端的源地址
+    HashMap<Integer ,Message> users;//用于存储客户端的源地址
     LinkedList<Message> list = new LinkedList<>();//消息队列,临界资源
     int flag_list = 0;//0可用
 
@@ -60,7 +61,7 @@ public class ServerSocket {
     // 创建服务端,监听本机地址的一个端口
     public ServerSocket(int port) {
         this.port = port;
-        users = new HashSet<>();
+        users = new HashMap<>();
         try {
             datagramSocket = new DatagramSocket(port);// 服务器绑定到一个本机地址上的指定端口
         } catch (SocketException e) {
@@ -133,22 +134,26 @@ public class ServerSocket {
             case -1:
                 users.remove(msg.DesId);
                 System.out.println(msg.txt);
-                for (Integer t : users) {
-                    send(msg, "127.0.0.1", t);
+                for (Message t : users.values()) {
+                    if(t.SrcId!=msg.SrcId) {
+                        send(msg, "127.0.0.1", t.SrcId);
+//                        send(msg, "127.0.0.1", );
+                    }
                 }
                 break;
             // 上线
             case 1:
-                users.add(msg.SrcId);
+                users.put(msg.SrcId,msg);
                 System.out.println(msg.txt);
-                for (Integer t : users) {
-                    send(msg, "127.0.0.1", t);
+                for (Message t : users.values()) {
+                    if(t.SrcId==msg.SrcId) continue;
+                    send(msg, "127.0.0.1", t.SrcId);
                 }
                 break;
             // 群聊
             case 0:
-                for (Integer t : users) {
-                        send(msg, "127.0.0.1", t);
+                for (Message t : users.values()) {
+                        send(msg, "127.0.0.1", t.SrcId);
                 }
                 break;
             // 私聊

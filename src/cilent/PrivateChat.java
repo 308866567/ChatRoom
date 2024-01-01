@@ -1,5 +1,7 @@
 package cilent;
 
+import common.Message;
+import common.UserSocket;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -12,73 +14,90 @@ import org.eclipse.swt.widgets.Button;
 
 /**
  * 私聊界面
- * @author 308866567
  *
+ * @author 308866567
  */
 public class PrivateChat extends Dialog {
 
-	protected Object result;
-	protected Shell shell;
-	private Table table;
-	private Text text;
+    protected Object result;
+    protected Shell shell;
+    private Table table;
+    private Text text;
+    UserSocket userSocket;
 
-	/**
-	 * Create the dialog.
-	 * @param parent
-	 * @param style
-	 */
-	public PrivateChat(Shell parent, int style) {
-		super(parent, style);
-		setText("SWT Dialog");
+	//必传
+	public void setUserSocket(UserSocket userSocket) {
+		this.userSocket = userSocket;
+		//TODO 发送按钮 发送消息模板
+//		System.out.println("发送");
+//		Message t=userSocket.initMessage();
+//		t.txt=text.getText();
+//		if(t.txt==null)
+//			t.txt="";
+//		t.flag=-1;
+//		userSocket.addMessage(t);
+//		text.setText("");
 	}
 
 	/**
-	 * Open the dialog.
-	 * @return the result
-	 */
-	public Object open() {
-		createContents();
-		shell.open();
-		shell.layout();
-		Display display = getParent().getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-		return result;
-	}
+     * Create the dialog.
+     *
+     * @param parent
+     * @param style
+     */
+    public PrivateChat(Shell parent, int style) {
+        super(parent, style);
+        setText("SWT Dialog");
+    }
 
-	/**
-	 * Create contents of the dialog.
-	 */
-	private void createContents() {
-		shell = new Shell(getParent(), getStyle());
-		shell.setSize(740, 524);
-		shell.setText("私聊");
-		
-		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		table.setHeaderVisible(true);
-		table.setBounds(10, 10, 694, 253);
-		
-		TableColumn uname = new TableColumn(table, SWT.NONE);
-		uname.setWidth(100);
-		uname.setText("New Column");
-		
-		TableColumn chatMessage = new TableColumn(table, SWT.NONE);
-		chatMessage.setWidth(500);
-		chatMessage.setText("New Column");
-		
-		text = new Text(shell, SWT.BORDER | SWT.MULTI);
-		text.setBounds(10, 269, 694, 137);
-		
-		Button send = new Button(shell, SWT.NONE);
-		send.setBounds(590, 412, 114, 34);
-		send.setText("发送");
-		
-		Button headshot = new Button(shell, SWT.NONE);
-		headshot.setBounds(470, 412, 114, 34);
-		headshot.setText("表情包");
+    /**
+     * Open the dialog.
+     *
+     * @return the result
+     */
+    public Object open() {
+        createContents();
+        shell.open();
+        shell.layout();
+        Display display = getParent().getDisplay();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                display.sleep();
+            }
+        }
+        return result;
+    }
 
-	}
+    /**
+     * Create contents of the dialog.
+     */
+    private void createContents() {
+        shell = new Shell(getParent(), getStyle());
+        shell.setSize(740, 524);
+        shell.setText("私聊");
+
+        table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
+        table.setHeaderVisible(true);
+        table.setBounds(10, 10, 694, 253);
+
+        TableColumn uname = new TableColumn(table, SWT.NONE);
+        uname.setWidth(100);
+        uname.setText("New Column");
+
+        TableColumn chatMessage = new TableColumn(table, SWT.NONE);
+        chatMessage.setWidth(500);
+        chatMessage.setText("New Column");
+
+        text = new Text(shell, SWT.BORDER | SWT.MULTI);
+        text.setBounds(10, 269, 694, 137);
+
+        Button send = new Button(shell, SWT.NONE);
+        send.setBounds(590, 412, 114, 34);
+        send.setText("发送");
+
+        Button headshot = new Button(shell, SWT.NONE);
+        headshot.setBounds(470, 412, 114, 34);
+        headshot.setText("表情包");
+
+    }
 }
