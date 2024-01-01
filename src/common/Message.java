@@ -24,7 +24,7 @@ public class Message implements Serializable {
 
     @Override
     public String toString() {
-        return "端口:" + SrcId + "的" + name + "说:" + txt;
+        return "端口:" + SrcId + "的用户(" + name + ")说:" + txt;
     }
 
     public static byte[] toByteArray(Message m) {
@@ -36,13 +36,13 @@ public class Message implements Serializable {
         }
         return byteArrayOutputStream.toByteArray();
     }
-
+    //可能会返回空
     public static Message getMessage(byte[] t) {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(t);
         try (ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
             return (Message) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("字节转消息失败,丢弃");
             return null;
         }
     }

@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import static java.lang.Thread.sleep;
 
@@ -17,6 +18,9 @@ public class ServerSocket implements Runnable {
     DatagramSocket datagramSocket;//UDP套接字
     int messageSize = 0;//消息标志
     HashSet<Integer> users;//用于存储客户端的源地址
+
+    LinkedList<Message> list= new LinkedList<>();//消息队列,临界资源
+    int flag_list=0;//0可用
 
     // 创建服务端,监听本机地址的一个端口
     public ServerSocket(int port) {
@@ -62,6 +66,7 @@ public class ServerSocket implements Runnable {
     DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
     // 接受所监听端口的消息,进行处理和分发
 
+    //可能返回空
     public Message receive() {
         //接收的数据包
         try {
@@ -76,7 +81,6 @@ public class ServerSocket implements Runnable {
         //字节数组,反序列化转化为Message
         Message msg = Message.getMessage(t);
         //新接收到的消息放入消息队列等待处理 TODO
-        msg.id = ++messageSize;
         return msg;
     }
 
@@ -113,24 +117,27 @@ public class ServerSocket implements Runnable {
         datagramSocket.close();
     }
 
-    //线程方法:循环接收来自客户端的消息,并进行分发
+    //接收线程:循环接收来自客户端的消息,并进行分发
     //接收消息,缓存到消息队列里,等待外界进行接收处理
     @Override
     public void run() {
         while (true) {
-//                        System.out.print("执行接收");
             try {
                 Message msg = receive();
+                System.out.println("接收到消息");
                 if (msg == null) {
-                    System.out.println("未收到消息");
-                    sleep(200);
+                    System.out.println("消息丢失");
                     continue;
                 }
-//                            System.out.println(msg.txt);
-                // 分发
-                solve(msg);
-                // 在服务器面板上显示接收到的消息 TODO
+                //发消息给客户端
+//                solve(msg);
+                //接收到的消息放到队列里
+                flag_list = 1;
+                list.push(msg);
+                flag_list = 0;
+                System.out.println("消息处理完成");
             } catch (Exception e) {
+                System.out.println("服务端接收线程出错");
                 e.printStackTrace();
             }
         }
