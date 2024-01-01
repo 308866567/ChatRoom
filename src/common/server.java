@@ -8,23 +8,29 @@ public class server {
         Thread rec = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true){
-                serverSocket.receiveMessage();
+                while (true) {
+                    serverSocket.receiveMessage();
                 }
             }
         });
         Thread get = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true){
-                Message t = serverSocket.getMessage();
-                if (t == null) {
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                while (true) {
+                    Message t = serverSocket.getMessage();
+                    if (t != null) {
+                        System.out.println("\n-------------------\n");
+                        System.out.println(t);
+                        System.out.println("\n-------------------\n");
                     }
-                }
+
+                    if (t == null) {
+                        try {
+                            Thread.sleep(1500);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
             }
         });

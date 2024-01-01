@@ -22,18 +22,18 @@ public class ServerSocket {
     public void receiveMessage() {
         try {
             Message msg = socketReceive();//阻塞,接收到了才会执行
-            System.out.println("接收到消息");
             if (msg == null) {
-                System.out.println("消息丢失");
+                System.out.println("消息丢失-UDP丢包");
                 return;
             }
+//            System.out.println("接收到消息");
             //发消息给客户端
             solve(msg);
             //接收到的消息放到队列里
             flag_list = 1;
             list.push(msg);
             flag_list = 0;
-            System.out.println("消息处理完成");
+//            System.out.println("消息处理完成");
         } catch (Exception e) {
             System.out.println("服务端接收线程出错");
             e.printStackTrace();
@@ -46,14 +46,14 @@ public class ServerSocket {
         if (flag_list == 0) {
             if (!list.isEmpty()) {
                 Message t = list.pollLast();
-                System.out.println(t);
+//                System.out.println(t);
                 return t;
             } else {
-                System.out.println("没有消息");
+//                System.out.println("没有消息");
                 return null;
             }
         }
-        System.out.println("list正在被使用");
+//        System.out.println("list正在被使用");
         return null;
     }
 
@@ -142,12 +142,12 @@ public class ServerSocket {
             // 群聊
             case 0:
                 for (Integer t : users) {
-                    if (t != msg.SrcId)
                         send(msg, "127.0.0.1", t);
                 }
                 break;
             // 私聊
             case 3:
+//                System.out.println("\n\n\n这是一条私聊!!!!!");
                 send(msg, "127.0.0.1", msg.DesId);
                 break;
         }
