@@ -83,9 +83,7 @@ public class Server1 {
         });
         rec.start();
 
-
-
-
+        //事件响应
         shell.open();
         shell.layout();
         while (!shell.isDisposed()) {

@@ -88,7 +88,7 @@ public class Client1 {
                 }
             }
         });
-
+    //发送消息线程
 		Thread send = new Thread(new Runnable() {
 			@Override
 			public void run() {
