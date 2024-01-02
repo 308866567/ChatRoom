@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Text;
 public class ServerStart {
 
 	protected Shell shell;
+	
+	private Text port;
 
 	/**
 	 * Launch the application.
@@ -63,20 +65,36 @@ public class ServerStart {
 		label.setBounds(131, 90, 180, 40);
 		label.setText("聊天室服务器");
 		
+
+		Label label_1 = new Label(shell, SWT.NONE);
+		label_1.setBounds(125, 171, 90, 24);
+		label_1.setText("服务器端口 : ");
+		
+		port = new Text(shell, SWT.BORDER);
+		port.setBounds(225, 168, 62, 30);
+		port.setText("11111");
+
+		
 		Button button = new Button(shell, SWT.NONE);
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				SwtUtils.pop_upFrame(shell, "提示", "服务器已打开");
+//				SwtUtils.pop_upFrame(shell, "提示", "服务器已打开");
 //				Server t = new Server(shell, SWT.APPLICATION_MODAL | SWT.CLOSE);
 //				t.open();
 				Server1 server1 = new Server1();
+				server1.setPort(Integer.parseInt(port.getText()));
 				server1.open();
+				close();
 			}
 		});
 		
 		button.setBounds(173, 218, 110, 34);
 		button.setText("开启服务器");
 
+
+	}
+	void close(){
+		shell.setVisible(false);
 	}
 }

@@ -40,7 +40,12 @@ public class Server1 {
 
     //套接字
     int port=11111;
-    ServerSocket serverSocket = new ServerSocket(port);
+    ServerSocket serverSocket ;
+
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 
     /**
      * Launch the application.
@@ -57,12 +62,15 @@ public class Server1 {
             e.printStackTrace();
         }
     }
+    
+    
 
     /**
      * Open the window.
      */
     public void open() {
         Display display = Display.getDefault();
+        serverSocket  = new ServerSocket(port);
         createContents();
         //TODO 添加接收线程
         Thread rec = new Thread(new Runnable() {
@@ -104,7 +112,7 @@ public class Server1 {
 
         shell = new Shell();
         shell.setSize(900, 700);
-        shell.setText("聊天室服务器");
+        shell.setText("聊天室服务器"+port);
         SwtUtils.centerWin(shell);
 
         // 用户列表 用户信息,用户头像

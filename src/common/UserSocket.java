@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 //存储客户端的用户信息
 public class UserSocket {
-    int id;// 套接字创建后,随机绑定的端口
+    public int id;// 套接字创建后,随机绑定的端口
     String name;
     DatagramSocket datagramSocket;
     InetSocketAddress address;//服务器地址

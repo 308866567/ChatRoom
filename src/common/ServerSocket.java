@@ -10,7 +10,7 @@ import static java.lang.Thread.sleep;
 
 //存储服务端的信息
 public class ServerSocket {
-    int port;//服务端监听的端口号
+   public int port;//服务端监听的端口号
     String name = "服务器";//服务端名称
     //临界资源
     DatagramSocket datagramSocket;//UDP套接字
@@ -165,7 +165,9 @@ public class ServerSocket {
             // 私聊
             case 3:
 //                System.out.println("\n\n\n这是一条私聊!!!!!");
+                send(msg, "127.0.0.1", msg.SrcId);
                 send(msg, "127.0.0.1", msg.DesId);
+
                 break;
         }
     }

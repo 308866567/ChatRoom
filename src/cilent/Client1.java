@@ -13,8 +13,10 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -43,8 +45,15 @@ public class Client1 {
     String ip = "127.0.0.1";
     int port = 11111;
     // 套接字
-    UserSocket userSocket = new UserSocket(name, ip, port);
+    UserSocket userSocket ;
 
+
+    public void init(String name,String ip,int port){
+        this.name=name;
+        this.ip=ip;
+        this.port=port;
+
+    }
 
     /**
      * Launch the application.
@@ -66,6 +75,7 @@ public class Client1 {
      */
     public void open() {
         Display display = Display.getDefault();
+        userSocket  = new UserSocket(name, ip, port);
         createContents();
         shell.open();
         shell.layout();
@@ -109,7 +119,7 @@ public class Client1 {
                 System.out.println("\n-------------------\n");
                 solveMessage(t);
             }
-//
+
             if (!display.readAndDispatch()) {
                 display.sleep();
             }
@@ -123,7 +133,7 @@ public class Client1 {
     protected void createContents() {
         shell = new Shell();
         shell.setSize(900, 700);
-        shell.setText("群聊");
+        shell.setText("我是"+userSocket.id+"---"+name);
 
         // 用户列表 用户信息,用户头像
         ulist = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
@@ -131,12 +141,12 @@ public class Client1 {
 
         //column只用于定义列的格式
         TableColumn headshot = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
-        headshot.setWidth(60);
+        headshot.setWidth(100);
 
         TableColumn uname = new TableColumn(ulist, SWT.BORDER | SWT.FULL_SELECTION);
-        uname.setWidth(150);
+        uname.setWidth(110);
         TableItem item = new TableItem(ulist, SWT.NONE);
-        item.setText(0, "头像");
+        item.setText(0, "用户地址");
         item.setText(1, "用户名");
         ulist.redraw();
 
@@ -185,6 +195,32 @@ public class Client1 {
         send.setBounds(744, 602, 100, 30);
         send.setText("发送");
 
+//
+//        Message mm=userSocket.initMessage();
+//        addUser(mm,ulist);
+//        mm.SrcId=1111;
+//        addUser(mm,ulist);
+//        mm.SrcId=2222;
+//        addUser(mm,ulist);
+
+        ulist.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDown(MouseEvent e) {
+                if(e.count==2){
+//                    System.out.println("双击了表格");
+                    Table t= (Table) e.getSource();
+
+                    TableItem[] items = t.getSelection();
+                    String des=items[0].getText(0);
+                    System.out.println(des);
+                    if(des.equals("头像")){
+                        return;
+                    }
+                    PrivateChat privateChat = new PrivateChat(shell, SWT.CLOSE, userSocket,Integer.parseInt(des));
+                    privateChat.open();
+                }
+            }
+        });
 //		Button memes = new Button(shell, SWT.NONE);
 //		// 添加点击事件显示一个对话框选择要发送的表情包
 //		memes.addMouseListener(new MouseAdapter() {
@@ -306,7 +342,6 @@ public class Client1 {
         item.setText(1, msg.name+"");
         table.setData(msg.SrcId+"",item);
 //        TableItem item = (TableItem )   table.getData(msg.SrcId+"");
-        table.redraw();
         table.redraw();
     }
 

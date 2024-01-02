@@ -1,19 +1,13 @@
 package cilent;
 
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Text;
 
-import util.CustomCombo;
-
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -22,7 +16,8 @@ public class Login {
 
 	protected Shell shell;
 	private Text uname;
-	private Text uIP;
+	private Text ip;
+	private Text port;
 //	String name;
 //	String IP;
 //	int port;
@@ -69,18 +64,24 @@ public class Login {
 		
 		Label lblIp = new Label(shell, SWT.NONE);
 		lblIp.setBounds(125, 131, 90, 24);
-		lblIp.setText("IP : ");
+		lblIp.setText("服务器IP : ");
 		
 		Label label_1 = new Label(shell, SWT.NONE);
 		label_1.setBounds(125, 171, 90, 24);
-		label_1.setText("头像 : ");
+		label_1.setText("服务器端口 : ");
 		
 		uname = new Text(shell, SWT.BORDER);
 		uname.setBounds(225, 91, 207, 30);
 		
-		uIP = new Text(shell, SWT.BORDER);
-		uIP.setBounds(225, 131, 207, 30);
-		
+		ip = new Text(shell, SWT.BORDER);
+		ip.setBounds(225, 131, 207, 30);
+		ip.setText("127.0.0.1");
+
+		port = new Text(shell, SWT.BORDER);
+		port.setBounds(225, 168, 62, 30);
+		port.setText("11111");
+
+
 //		Combo headshot = new Combo(shell, SWT.NONE);
 //		headshot.setItems(new String[] {"1"});
 //		
@@ -102,6 +103,7 @@ public class Login {
 			@Override
 			public void mouseDown(MouseEvent e) {
 				Client1 client1 = new Client1();
+				client1.init(uname.getText(),ip.getText(), Integer.parseInt(port.getText()));
 				//TODO
 				client1.open();
 			}
