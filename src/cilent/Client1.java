@@ -156,7 +156,8 @@ public class Client1 {
 
         TableColumn username = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
         username.setWidth(150);
-
+        TableColumn ustate = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
+        ustate.setWidth(100);
         TableColumn content = new TableColumn(chatContent, SWT.BORDER | SWT.FULL_SELECTION);
         content.setWidth(400);
 
@@ -388,13 +389,25 @@ public class Client1 {
 
     void addMessage(Message msg, Table table) {
         System.out.println(msg.txt);
+
+
         // 加一行表格
         TableItem item = new TableItem(table, SWT.NONE);
         if (msg.name != null)
             item.setText(0, msg.name);
         if (msg.txt != null)
-            item.setText(1, msg.txt);
-
+            item.setText(2, msg.txt);
+        switch (msg.flag) {
+            case 0:
+                item.setText(1,"群聊");
+                break;
+            // 接收到一条私聊
+            case 3:
+                item.setText(1,"私聊");
+                break;
+            default:
+                item.setText(1,"未知");
+        }
         table.redraw();
     }
 }
